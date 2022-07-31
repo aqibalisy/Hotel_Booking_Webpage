@@ -2,7 +2,39 @@ let urlParams = new URLSearchParams(window.location.search);
 
 const API_URL = 'https://travel-advisor.p.rapidapi.com/';
 const tripAdvisorHost = 'travel-advisor.p.rapidapi.com';
-const tripAdvisorKey = 'b95ff655c7msh54a23b129460bdfp104587jsneb6ebeca60c2';
+const tripAdvisorKey = '"b95ff655c7msh54a23b129460bdfp104587jsneb6ebeca60c2';
+
+let initMap = (locations) => {
+  let center = {
+    lng: parseFloat(locations[0][2]),
+  };
+  let map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 10,
+    center: center,
+  });
+  let infoWindow = new google.maps.InfoWindow({});
+  let marker, count;
+  for (count = 0; count < locations.length; count++) {
+    marker = new google.maps.Marker({
+      position: new google.maps.LatLng(
+        locations[count][1],
+        locations[count][2]
+      ),
+      map: map,
+      title: locations[count][0],
+    });
+    google.maps.event.addListener(
+      marker,
+      'click',
+      ((marker, count) => {
+        return function () {
+          infoWindow.setContent(locations[count][0]);
+          infoWindow.open(map, marker);
+        };
+      })(marker, count)
+    );
+  }
+};
 
 let initList = (hotelList) => {
   let hotelListElement = document.getElementById('hotel-list');
@@ -49,6 +81,7 @@ let initList = (hotelList) => {
   });
 };
 
+//This function is used to display the list of hotels in a particular city fetched from the API
 let fetchHotelListAPI = () => {
   let xhr = new XMLHttpRequest();
 
@@ -69,6 +102,7 @@ let fetchHotelListAPI = () => {
       });
       initList(hotelList);
       initMap(locations);
+      disableLoader();
     }
   });
 
